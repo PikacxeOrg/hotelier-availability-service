@@ -1,4 +1,4 @@
-namespace AvailabilityService.Domain;
+namespace Hotelier.Events;
 
 /// <summary>
 /// Published when availability periods are created or updated.
@@ -11,6 +11,7 @@ public record AvailabilityUpdated
     public DateTime FromDate { get; init; }
     public DateTime ToDate { get; init; }
     public decimal Price { get; init; }
+    public string PriceType { get; init; } = string.Empty;
     public bool IsAvailable { get; init; }
     public DateTime Timestamp { get; init; } = DateTime.UtcNow;
 }
