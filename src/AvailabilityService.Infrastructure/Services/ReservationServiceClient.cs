@@ -18,7 +18,7 @@ public class ReservationServiceClient(
     };
 
     public async Task<(bool HasReservations, string? Reason)> HasReservationsInPeriodAsync(
-        Guid accommodationId, DateTime fromDate, DateTime toDate)
+        Guid accommodationId, DateOnly fromDate, DateOnly toDate)
     {
         try
         {

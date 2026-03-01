@@ -41,7 +41,7 @@ public class AvailabilityControllerTests : IDisposable
 
         // Default: no reservations blocking changes
         _reservationClientMock
-            .Setup(c => c.HasReservationsInPeriodAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .Setup(c => c.HasReservationsInPeriodAsync(It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<DateOnly>()))
             .ReturnsAsync((false, (string?)null));
 
         _sut = new AvailabilityController(_db, _publisherMock.Object, _reservationClientMock.Object, logger.Object);
@@ -61,15 +61,15 @@ public class AvailabilityControllerTests : IDisposable
     }
 
     private Availability SeedAvailability(
-        DateTime? from = null, DateTime? to = null,
+        DateOnly? from = null, DateOnly? to = null,
         decimal price = 100m, PriceType priceType = PriceType.PerUnit,
         bool isAvailable = true)
     {
         var avail = new Availability
         {
             AccommodationId = _accommodationId,
-            FromDate = from ?? DateTime.UtcNow.AddDays(10),
-            ToDate = to ?? DateTime.UtcNow.AddDays(20),
+            FromDate = from ?? DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10),
+            ToDate = to ?? DateOnly.FromDateTime(DateTime.UtcNow).AddDays(20),
             Price = price,
             PriceType = priceType,
             IsAvailable = isAvailable,
@@ -90,8 +90,8 @@ public class AvailabilityControllerTests : IDisposable
         var request = new CreateAvailabilityRequest
         {
             AccommodationId = _accommodationId,
-            FromDate = DateTime.UtcNow.AddDays(1),
-            ToDate = DateTime.UtcNow.AddDays(10),
+            FromDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1),
+            ToDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10),
             Price = 150m,
             PriceType = PriceType.PerGuest
         };
@@ -111,8 +111,8 @@ public class AvailabilityControllerTests : IDisposable
         var request = new CreateAvailabilityRequest
         {
             AccommodationId = _accommodationId,
-            FromDate = DateTime.UtcNow.AddDays(1),
-            ToDate = DateTime.UtcNow.AddDays(5),
+            FromDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1),
+            ToDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(5),
             Price = 80m,
             PriceType = PriceType.PerUnit
         };
@@ -133,8 +133,8 @@ public class AvailabilityControllerTests : IDisposable
         var request = new CreateAvailabilityRequest
         {
             AccommodationId = _accommodationId,
-            FromDate = DateTime.UtcNow.AddDays(10),
-            ToDate = DateTime.UtcNow.AddDays(5),
+            FromDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10),
+            ToDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(5),
             Price = 100m,
             PriceType = PriceType.PerUnit
         };
@@ -150,8 +150,8 @@ public class AvailabilityControllerTests : IDisposable
         var request = new CreateAvailabilityRequest
         {
             AccommodationId = _accommodationId,
-            FromDate = DateTime.UtcNow.AddDays(1),
-            ToDate = DateTime.UtcNow.AddDays(10),
+            FromDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1),
+            ToDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10),
             Price = 100m,
             PriceType = PriceType.PerUnit,
             PriceModifiers = new Dictionary<string, decimal>
@@ -273,7 +273,7 @@ public class AvailabilityControllerTests : IDisposable
     public async Task GetByAccommodation_ReturnsAll()
     {
         SeedAvailability();
-        SeedAvailability(from: DateTime.UtcNow.AddDays(30), to: DateTime.UtcNow.AddDays(40));
+        SeedAvailability(from: DateOnly.FromDateTime(DateTime.UtcNow).AddDays(30), to: DateOnly.FromDateTime(DateTime.UtcNow).AddDays(40));
 
         var result = await _sut.GetByAccommodation(_accommodationId);
 
@@ -286,7 +286,7 @@ public class AvailabilityControllerTests : IDisposable
     public async Task GetByAccommodation_AvailableOnly_FiltersUnavailable()
     {
         SeedAvailability(isAvailable: true);
-        SeedAvailability(from: DateTime.UtcNow.AddDays(30), to: DateTime.UtcNow.AddDays(40), isAvailable: false);
+        SeedAvailability(from: DateOnly.FromDateTime(DateTime.UtcNow).AddDays(30), to: DateOnly.FromDateTime(DateTime.UtcNow).AddDays(40), isAvailable: false);
 
         var result = await _sut.GetByAccommodation(_accommodationId, availableOnly: true);
 
@@ -303,14 +303,14 @@ public class AvailabilityControllerTests : IDisposable
     public async Task CheckAvailability_Available_ReturnsTrueWithPrice()
     {
         SeedAvailability(
-            from: DateTime.UtcNow.AddDays(1),
-            to: DateTime.UtcNow.AddDays(20),
+            from: DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1),
+            to: DateOnly.FromDateTime(DateTime.UtcNow).AddDays(20),
             price: 100m);
 
         var result = await _sut.CheckAvailability(
             _accommodationId,
-            DateTime.UtcNow.AddDays(5),
-            DateTime.UtcNow.AddDays(10));
+            DateOnly.FromDateTime(DateTime.UtcNow).AddDays(5),
+            DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10));
 
         var ok = result.Should().BeOfType<OkObjectResult>().Subject;
         var body = ok.Value.Should().BeOfType<CheckAvailabilityResponse>().Subject;
@@ -326,8 +326,8 @@ public class AvailabilityControllerTests : IDisposable
         // No availability windows seeded
         var result = await _sut.CheckAvailability(
             _accommodationId,
-            DateTime.UtcNow.AddDays(5),
-            DateTime.UtcNow.AddDays(10));
+            DateOnly.FromDateTime(DateTime.UtcNow).AddDays(5),
+            DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10));
 
         var ok = result.Should().BeOfType<OkObjectResult>().Subject;
         var body = ok.Value.Should().BeOfType<CheckAvailabilityResponse>().Subject;

@@ -37,7 +37,7 @@ public class AvailabilityController(
         if (request.FromDate >= request.ToDate)
             return BadRequest(new { message = "FromDate must be before ToDate." });
 
-        if (request.FromDate.Date < DateTime.UtcNow.Date)
+        if (request.FromDate < DateOnly.FromDateTime(DateTime.UtcNow))
             return BadRequest(new { message = "Cannot create availability periods in the past." });
 
         var availability = new Availability
@@ -161,7 +161,7 @@ public class AvailabilityController(
             .AsQueryable();
 
         if (availableOnly)
-            query = query.Where(a => a.IsAvailable && a.ToDate > DateTime.UtcNow);
+            query = query.Where(a => a.IsAvailable && a.ToDate > DateOnly.FromDateTime(DateTime.UtcNow));
 
         var results = await query.ToListAsync();
 
@@ -177,8 +177,8 @@ public class AvailabilityController(
     [HttpGet("internal/check")]
     public async Task<IActionResult> CheckAvailability(
         [FromQuery] Guid accommodationId,
-        [FromQuery] DateTime checkIn,
-        [FromQuery] DateTime checkOut)
+        [FromQuery] DateOnly checkIn,
+        [FromQuery] DateOnly checkOut)
     {
         var available = await db.Availabilities.AnyAsync(a =>
             a.AccommodationId == accommodationId
@@ -198,7 +198,7 @@ public class AvailabilityController(
 
             if (window is not null)
             {
-                var nights = (checkOut.Date - checkIn.Date).Days;
+                var nights = checkOut.DayNumber - checkIn.DayNumber;
                 priceInfo = new AvailabilityPriceInfo
                 {
                     PricePerNight = window.Price,
