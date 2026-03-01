@@ -44,6 +44,15 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+var reservationServiceUrl = builder.Configuration["Services:Reservation"]
+    ?? "http://reservation-service:8080";
+
+builder.Services.AddHttpClient<AvailabilityService.Domain.IReservationServiceClient, AvailabilityService.Infrastructure.ReservationServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(reservationServiceUrl);
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumers(typeof(AvailabilityService.Infrastructure.ReservationApprovedConsumer).Assembly);
