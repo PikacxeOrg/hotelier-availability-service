@@ -6,8 +6,8 @@ namespace AvailabilityService.Api;
 
 public class UpdateAvailabilityRequest
 {
-    public DateTime? FromDate { get; set; }
-    public DateTime? ToDate { get; set; }
+    public DateOnly? FromDate { get; set; }
+    public DateOnly? ToDate { get; set; }
 
     [Range(0.01, double.MaxValue)]
     public decimal? Price { get; set; }

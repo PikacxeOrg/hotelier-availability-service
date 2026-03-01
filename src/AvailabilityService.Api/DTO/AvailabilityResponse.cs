@@ -6,8 +6,8 @@ public class AvailabilityResponse
 {
     public Guid Id { get; set; }
     public Guid AccommodationId { get; set; }
-    public DateTime FromDate { get; set; }
-    public DateTime ToDate { get; set; }
+    public DateOnly FromDate { get; set; }
+    public DateOnly ToDate { get; set; }
     public decimal Price { get; set; }
     public PriceType PriceType { get; set; }
     public Dictionary<string, decimal> PriceModifiers { get; set; } = new();

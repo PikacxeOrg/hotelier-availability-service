@@ -7,5 +7,5 @@ namespace AvailabilityService.Domain;
 public interface IReservationServiceClient
 {
     Task<(bool HasReservations, string? Reason)> HasReservationsInPeriodAsync(
-        Guid accommodationId, DateTime fromDate, DateTime toDate);
+        Guid accommodationId, DateOnly fromDate, DateOnly toDate);
 }
